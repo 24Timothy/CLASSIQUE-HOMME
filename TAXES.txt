@@ -1,0 +1,315 @@
+SOURCE CODE:
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Structure definition for Vehicle
+typedef struct {
+    double cif; // Cost, Insurance, and Freight
+    int seatingCapacity; // Number of seats
+    double grossWeight; // Gross weight in tons
+    int engineCapacity; // Engine capacity in CC
+    int age; // Age of the vehicle
+    char type[20]; // Type of the vehicle (e.g., Ambulance, Estate, Sedan, SUV, Trailer)
+    int daysInBond; // Days in bond
+    char transportMode[20]; // Mode of transport (carrier/driven)
+} Vehicle;
+
+// Function declarations
+void calculateAmbulanceTaxes(Vehicle vehicle);
+void calculateEstateTaxes(Vehicle vehicle);
+void calculateSedanTaxes(Vehicle vehicle);
+void calculateSuvTaxes(Vehicle vehicle);
+void calculateTrailerTaxes(Vehicle vehicle);
+void calculateOtherTaxes(Vehicle vehicle);
+
+int main() {
+    Vehicle vehicle;
+
+    // Input vehicle details
+do {
+        printf("Enter the Vehicle Type (e.g 'Ambulance', 'Estate', 'Sedan', 'Sports Utility Vehicle(SUV)', 'Trailer' or 'Other Vehicles'): ");
+        scanf("%s", vehicle.type); // Changed to read a string
+
+        if (strcmp(vehicle.type, "Ambulance")!= 0 && strcmp(vehicle.type, "Estate")!= 0 && strcmp(vehicle.type, "Sedan")!= 0 && strcmp(vehicle.type, "Sports Utility Vehicle(SUV)")!= 0 && strcmp(vehicle.type, "Trailer")!= 0 && strcmp(vehicle.type, "Other Vehicles")!= 0) {
+            printf("Invalid vehicle type.\n");
+            continue;
+        }
+
+        if (strcmp(vehicle.type, "Estate") == 0 || strcmp(vehicle.type, "Sedan") == 0 || strcmp(vehicle.type, "Trailer") == 0) {
+            printf("Enter engine capacity: ");
+            scanf("%d", &vehicle.engineCapacity);
+            printf("Enter gross weight (in tons): ");
+            scanf("%lf", &vehicle.grossWeight);
+        } else if (strcmp(vehicle.type, "Estate") == 0 || strcmp(vehicle.type, "Sports Utility Vehicle(SUV)") == 0) {
+            printf("Enter seating capacity: ");
+            scanf("%d", &vehicle.seatingCapacity);
+        }
+
+        if(strcmp(vehicle.type, "Other Vehicles")!= 0){
+            printf("Enter the Cost Insurance Freight: ");
+            scanf("%lf", &vehicle.cif);
+            printf("Enter age of the vehicle: ");
+            scanf("%d", &vehicle.age);
+            printf("Enter days in bond: ");
+            scanf("%d", &vehicle.daysInBond);
+            printf("Enter transport mode (carrier/driven): ");
+            scanf("%s", vehicle.transportMode);
+
+        } else{
+            // Handle other vehicles case here if needed
+        }
+
+    } while (strcmp(vehicle.type, "Ambulance")!= 0 && strcmp(vehicle.type, "Estate")!= 0 && strcmp(vehicle.type, "Sedan")!= 0 && strcmp(vehicle.type, "Sports Utility Vehicle(SUV)")!= 0 && strcmp(vehicle.type, "Trailer")!= 0 && strcmp(vehicle.type, "Other Vehicles")!= 0);
+
+    // Determine vehicle type and calculate taxes accordingly
+    if (strcmp(vehicle.type, "Ambulance") == 0) {
+        calculateAmbulanceTaxes(vehicle);
+    } else if (strcmp(vehicle.type, "Estate") == 0) {
+        calculateEstateTaxes(vehicle);
+    } else if (strcmp(vehicle.type, "Sedan") == 0) {
+        calculateSedanTaxes(vehicle);
+    } else if (strcmp(vehicle.type, "SUV") == 0) {
+        calculateSuvTaxes(vehicle);
+    } else if (strcmp(vehicle.type, "Trailer") == 0) {
+        calculateTrailerTaxes(vehicle);
+    } else {
+        calculateOtherTaxes(vehicle);
+    }
+
+    return 0;
+}
+
+// Function to print the tax breakdown
+void printTaxBreakdown(double id, double vat, double wht, double il, double sd, double ff, double ed, double registration, double extraSeatTax, double weightTax, double engineTax, double ageTax, double transportTax, double bondTax, const Vehicle* vehicle) {
+    printf("\n%19s\n", vehicle->type);
+    printf("\nImport Duty: %.2lf\n",id);
+    printf("VAT: %.2lf\n", vat);
+    printf("WHT: %.2lf\n", wht);
+    printf("Infrastructure Levy: %.2lf\n", il);
+    printf("Stamp Duty: %.2lf\n", sd);
+    printf("Form Fees: %.2lf\n", ff);
+    printf("Excise Duty: %.2lf\n", ed);
+    printf("Registration: %.2lf\n", registration);
+    printf("Extra Seat Tax: %.2lf\n", extraSeatTax);
+    printf("Weight Tax: %.2lf\n", weightTax);
+    printf("Engine Tax: %.2lf\n", engineTax);
+    printf("Age Tax: %.2lf\n", ageTax);
+    printf("Transport Tax: %.2lf\n", transportTax);
+    printf("Bond Tax: %.2lf\n", bondTax);
+    printf("Total Tax: %.2lf\n", id + vat + wht + il + sd + ff + ed + registration + extraSeatTax + weightTax + engineTax + ageTax + transportTax + bondTax);
+}
+
+// Function to calculate common taxes for all vehicles
+void calculateCommonTaxes(Vehicle vehicle, double *id, double *vat, double *wht, double *il, double *sd, double *ff, double *ed, double *registration, double *bondTax, double *transportTax) {
+    *id = 0.25 * vehicle.cif; // Import Duty
+    *vat = 0.18 * vehicle.cif; // VAT
+    *wht = 0.06 * vehicle.cif; // WHT
+    *il = 150000; // Infrastructure Levy
+    *sd = 35000; // Stamp Duty
+    *ff = 20000; // Form Fees
+    *ed = 200000; // Excise Duty
+    *bondTax = vehicle.daysInBond * 15000; // Bond Tax
+    *registration = (strcmp(vehicle.type, "Ambulance") == 0 || strcmp(vehicle.type, "Sedan") == 0) ? 700000 : 300000; // Registration Fee
+    *transportTax = (strcmp(vehicle.transportMode, "carrier") == 0) ? 0.005 * vehicle.cif : 0.015 * vehicle.cif; // Transport Tax
+}
+
+// Function to calculate taxes for Ambulances
+void calculateAmbulanceTaxes(Vehicle vehicle) {
+    double id = 0, vat = 0, wht = 0, il = 0, sd = 35000, ff = 20000, ed = 200000, registration = 700000, bondTax = 0, transportTax = 0;
+
+    // Infrastructure Levy based on age
+    il = vehicle.age > 10 ? 0.15 * vehicle.cif : 150000;
+
+    // Calculate bond tax and transport tax
+    bondTax = vehicle.daysInBond * 15000;
+    transportTax = strcmp(vehicle.transportMode, "carrier") == 0 ? 0.005 * vehicle.cif : 0.015 * vehicle.cif;
+
+    // Print the tax breakdown
+    printTaxBreakdown(id, vat, wht, il, sd, ff, ed, registration, 0, 0, 0, 0, transportTax, bondTax,&vehicle );
+}
+
+// Function to calculate taxes for Estates
+void calculateEstateTaxes(Vehicle vehicle) {
+    double id, vat, wht, il, sd, ff, ed, registration, bondTax, transportTax, extraSeatTax = 0, weightTax = 0, engineTax = 0, ageTax = 0;
+    calculateCommonTaxes(vehicle, &id, &vat, &wht, &il, &sd, &ff, &ed, &registration, &bondTax, &transportTax);
+
+    // Extra seat tax if seating capacity is more than 5
+    if (vehicle.seatingCapacity > 5) {
+        extraSeatTax = 250000 * (vehicle.seatingCapacity - 5);
+    }
+
+    // Weight tax based on gross weight
+    if (vehicle.grossWeight >= 1500 && vehicle.grossWeight <= 2000) {
+        weightTax = 0.05 * vehicle.cif;
+    } else if (vehicle.grossWeight > 2000) {
+        weightTax = 0.10 * vehicle.cif;
+    } else {
+        weightTax = 0.02 * vehicle.cif;
+    }
+
+    // Engine tax based on engine capacity
+    if (vehicle.engineCapacity > 1800) {
+        engineTax = 0.05 * vehicle.cif;
+    } else {
+        engineTax = 0.025 * vehicle.cif;
+    }
+
+    // Age tax based on age of the vehicle
+    if (vehicle.age >= 1 && vehicle.age < 5) {
+        ageTax = 0.01 * vehicle.cif;
+    } else if (vehicle.age >= 5 && vehicle.age <= 10) {
+        ageTax = 0.05 * vehicle.cif;
+    } else if (vehicle.age > 10) {
+        ageTax = 0.15 * vehicle.cif;
+    }
+
+    // Print the tax breakdown&vehicle
+    printTaxBreakdown(id, vat, wht, il, sd, ff, ed, registration, extraSeatTax, weightTax, engineTax, ageTax, transportTax, bondTax, &vehicle );
+}
+
+// Function to calculate taxes for Sedans
+void calculateSedanTaxes(Vehicle vehicle) {
+    double id, vat, wht, il, sd, ff, ed, registration, bondTax, transportTax, weightTax = 0, engineTax = 0, ageTax = 0;
+    calculateCommonTaxes(vehicle, &id, &vat, &wht, &il, &sd, &ff, &ed, &registration, &bondTax, &transportTax);
+
+    // Weight tax based on gross weight
+    if (vehicle.grossWeight >= 1500 && vehicle.grossWeight <= 2000) {
+        weightTax = 0.10 * vehicle.cif;
+    } else if (vehicle.grossWeight > 2000) {
+        weightTax = 0.15 * vehicle.cif;
+    } else {
+        weightTax = 0.02 * vehicle.cif;
+    }
+
+    // Engine tax based on engine capacity
+    if (vehicle.engineCapacity > 2000) {
+        engineTax = 0.10 * vehicle.cif;
+    } else if (vehicle.engineCapacity >= 1500 && vehicle.engineCapacity <= 2000) {
+        engineTax = 0.05 * vehicle.cif;
+    } else {
+        engineTax = 0.025 * vehicle.cif;
+    }
+
+    // Age tax based on age of the vehicle
+    if (vehicle.age > 10 && vehicle.age <= 15) {
+        ageTax = 0.10 * vehicle.cif;
+    } else if (vehicle.age >= 5 && vehicle.age <= 10) {
+        ageTax = 0.05 * vehicle.cif;
+    } else if (vehicle.age < 5) {
+        ageTax = 0.015 * vehicle.cif;
+    }
+
+    // Print the tax breakdown
+    printTaxBreakdown(id, vat, wht, il, sd, ff, ed, registration, 0, weightTax, engineTax, ageTax, transportTax, bondTax, &vehicle);
+}
+
+// Function to calculate taxes for SUVs
+void calculateSuvTaxes(Vehicle vehicle) {
+    double id, vat, wht, il, sd, ff, ed, registration, bondTax, transportTax, extraSeatTax = 0, ageTax = 0;
+    calculateCommonTaxes(vehicle, &id, &vat, &wht, &il, &sd, &ff, &ed, &registration, &bondTax, &transportTax);
+
+    // Extra seat tax if seating capacity is more than 5
+    if (vehicle.seatingCapacity > 5) {
+        extraSeatTax = 350000 * (vehicle.seatingCapacity - 5);
+    }
+
+    // Additional bond tax if gross weight is more than 5000 tons
+    if (vehicle.grossWeight > 5000) {
+        bondTax = 0.15 * vehicle.cif;
+    }
+
+    // Age tax based on age of the vehicle
+    if (vehicle.age >= 1 && vehicle.age < 5) {
+        ageTax = 0.01 * vehicle.cif;
+    } else if (vehicle.age >= 5 && vehicle.age <= 10) {
+        ageTax = 0.15 * vehicle.cif;
+    } else if (vehicle.age > 10) {
+        ageTax = 0.25 * vehicle.cif;
+    }
+
+    // Print the tax breakdown
+    printTaxBreakdown(id, vat, wht, il, sd, ff, ed, registration, extraSeatTax, 0, 0, ageTax, transportTax, bondTax, &vehicle);
+}
+
+// Function to calculate taxes for Trailers
+void calculateTrailerTaxes(Vehicle vehicle) {
+    double id, vat, wht, il, sd, ff, ed, registration, bondTax, transportTax, weightTax = 0, engineTax = 0, ageTax = 0;
+    calculateCommonTaxes(vehicle, &id, &vat, &wht, &il, &sd, &ff, &ed, &registration, &bondTax, &transportTax);
+
+    // Weight tax based on gross weight
+    if (vehicle.grossWeight >= 15000 && vehicle.grossWeight <= 20000) {
+        weightTax = 0.15 * vehicle.cif;
+    } else if (vehicle.grossWeight > 20000) {
+        weightTax = 0.25 * vehicle.cif;
+    } else {
+        weightTax = 0.05 * vehicle.cif;
+    }
+
+    // Engine tax based on engine capacity
+    if (vehicle.engineCapacity > 20000) {
+        engineTax = 0.10 * vehicle.cif;
+    } else if (vehicle.engineCapacity >= 15000 && vehicle.engineCapacity <= 20000) {
+        engineTax = 0.05 * vehicle.cif;
+    } else {
+        engineTax = 0.025 * vehicle.cif;
+    }
+
+    // Age tax based on age of the vehicle
+    if (vehicle.age > 10 && vehicle.age <= 15) {
+        ageTax = 0.10 * vehicle.cif;
+    } else if (vehicle.age >= 5 && vehicle.age <= 10) {
+        ageTax = 0.05 * vehicle.cif;
+    } else if (vehicle.age < 5) {
+        ageTax = 0.015 * vehicle.cif;
+    }
+
+    // Print the tax breakdown
+    printTaxBreakdown(id, vat, wht, il, sd, ff, ed, registration, 0, weightTax, engineTax, ageTax, transportTax, bondTax,&vehicle);
+}
+
+// Function to calculate taxes for other types of vehicles
+void calculateOtherTaxes(Vehicle vehicle) {
+    double id, vat, wht, il, sd, ff, ed, registration, bondTax, transportTax;
+    calculateCommonTaxes(vehicle, &id, &vat, &wht, &il, &sd, &ff, &ed, &registration, &bondTax, &transportTax);
+
+    // Print the tax breakdown
+    printTaxBreakdown(id, vat, wht, il, sd, ff, ed, registration, 0, 0, 0, 0, transportTax, bondTax, &vehicle);
+}
+
+
+
+
+
+
+
+OUTPUT:
+Enter the Vehicle Type (e.g 'Ambulance', 'Estate', 'Sedan', 'Sports Utility Vehicle(SUV)', 'Trailer' or 'Other Vehicles'): Ambulance
+Enter the Cost Insurance Freight: 2000
+Enter age of the vehicle: 5
+Enter days in bond: 7
+Enter transport mode (carrier/driven): carrier
+
+          Ambulance
+
+Import Duty: 0.00
+VAT: 0.00
+WHT: 0.00
+Infrastructure Levy: 150000.00
+Stamp Duty: 35000.00
+Form Fees: 20000.00
+Excise Duty: 200000.00
+Registration: 700000.00
+Extra Seat Tax: 0.00
+Weight Tax: 0.00
+Engine Tax: 0.00
+Age Tax: 0.00
+Transport Tax: 10.00
+Bond Tax: 105000.00
+Total Tax: 1210010.00
+
+
+
+=== Code Execution Successful ===
+
